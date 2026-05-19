@@ -1,4 +1,5 @@
 const Event = require("../models/event");
+const Registration = require("../models/registration");
 
 exports.createEvent = async (req, res) => {
   try {
@@ -95,13 +96,14 @@ exports.updateEvent = async (req, res) => {
       return res.status(403).json({ success: false, message: "Not authorized to edit this event." });
     }
 
-    const { title, description, date, location, category, image } = req.body;
+    const { title, description, date, location, category, organizer, image } = req.body;
 
     if (title) event.title = title;
     if (description) event.description = description;
     if (date) event.date = date;
     if (location) event.location = location;
     if (category) event.category = category;
+    if (organizer) event.organizer = organizer;
     if (image !== undefined) event.image = image;
 
     await event.save();
@@ -128,6 +130,7 @@ exports.deleteEvent = async (req, res) => {
     }
 
     await event.deleteOne();
+    await Registration.deleteMany({ eventId: req.params.id });
 
     res.status(200).json({ success: true, message: "Event deleted successfully" });
   } catch (error) {
